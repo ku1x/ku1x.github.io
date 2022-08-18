@@ -1,53 +1,57 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>bgchange</title>
-    <script type="text/javascript">
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Socket.IO Fiddle</title>
+  </head>
 
-        var timeStamp=500;
-        //加载函数 
-        window.onload=function(){ 
-            changeColor();
-            timeSet();
-        }
-        //颜色变化函数
-        function changeColor(){
-            //产生rgb的值
-             //var r=Math.floor(Math.random()*255);
-//             var g=Math.floor(Math.random()*255);
-//             var b=Math.floor(Math.random()*255);
-//              var rgb=r.toString(16)+r.toString(16)+r.toString(16); 
-//             //toString(radix) 把数字转化为radix（取值范围2~36）进制值表示的字符串
-	         document.body.bgColor = (0,0,0);
-		
-		
-		
-		
-            window.setTimeout("changeColor()", timeStamp);
-            //if (mySec==10) {
-              //  changeColor();
-            //}
-            //setTimeout() 方法用于在指定的毫秒数后调用函数或计算表达式。
-        }
-        function timeSet() {
-            var mySec = new Date();
-        /*var time='现在的时间是:';
-        time+=mydate.getYear()+"年"; //获取年份(2位)
-        time+=( mydate.getMonth() + 1 )+"月"; //获取月份(0-11,0代表1月)
-        time+=mydate.getDate()+"日"; //获取日(1-31)
-        time+="星期";
-        time+=mydate.getDay();  //获取星期(0-6,0代表星期天)
-        alert(time);*/
-            mySec = mySec.getSeconds;
-            //print(mySec);
-       // timeStamp = 2000;
+  <body>
+    <div id="bg" style="height: 100vh; width: 100vw">
+      <h2>Status: <span id="status">Disconnected</span></h2>
+      <h2>Messages:</h2>
+      <ul id="messages"></ul>
+    </div>
 
-	}
-        </script>
-</head>
-<body>
-	
-    
-</body>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const status = document.getElementById('status');
+      const messages = document.getElementById('messages');
+
+      const appendMessage = (content) => {
+        const item = document.createElement('li');
+        item.textContent = content;
+        messages.appendChild(item);
+      };
+
+      const socket = io({
+        // Socket.IO options
+      });
+
+      socket.on('connect', () => {
+        status.innerText = 'Connected';
+        appendMessage(`status: connected`);
+      });
+
+      socket.on('connect_error', (err) => {
+        appendMessage(`event: connect_error | reason: ${err.message}`);
+      });
+
+      socket.on('disconnect', (reason) => {
+        status.innerText = 'Disconnected';
+        appendMessage(`event: disconnect | reason: ${reason}`);
+      });
+
+      let resetTimeout = undefined;
+
+      socket.on('blink-now', (args) => {
+        const bg = document.getElementById('bg');
+        bg.style.backgroundColor = args.colour;
+        console.log('i should blink now with these settings:', args);
+        clearTimeout(resetTimeout);
+        resetTimeout = setTimeout(() => {
+          bg.style.backgroundColor = 'black';
+        }, args.timeToGlowInMs);
+      });
+    </script>
+  </body>
 </html>
